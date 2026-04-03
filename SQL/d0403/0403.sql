@@ -65,20 +65,36 @@ FROM STUDENT
 WHERE DEPTNO1 = 101;
 
 -- 85P 퀴즈 3
--- 1. - 부터 ) 까지 INSTR 뺄셈 길이 구하기
--- 2. SUBSTR 으로 1 길이만큼 지정하기(REPLACE 항)
--- 3. INSTR 로 ) 부터 - 까지 길이 구하기
--- 4. LPAD로 "*" 개수 맞추기
--- 5. REPLACE 하기 
-select  name, 
-        tel,
-        REPLACE(TEL RTRIM( TEL, (INSTR(TEL, '-') - INSTR(TEL, ')')-1), '*')
+-- 1. ) 까지 INSTR 길이 구하기, -까지 길이 구하기 , 빼기 SUBSTR 하기
+-- 2. LPAD와 INSTR로 "*" 개수 맞추기
+-- 3. REPLACE 하기 전체 , 1 만큼, 2로 바꾸기
+-- 4. WHERE 붙히기
 
-    end as "REPLACE"
-from student;
+-- 1 2 3 4 5 6 7 8 9 10 11
+-- 0 2 )  3 0 1 - 1 5 7   4
+
+select  name, 
+        tel, 
+	    replace ( 
+            tel, 
+		    SUBSTR(
+                tel,  
+                INSTR(TEL, ')') +1,   			--  3+1 =4 부터
+		        INSTR(TEL, '-') - INSTR(TEL, ')') -1 -- 7 - 3 - 1 = 3 길이만큼
+            ),  		
+		    LPAD('*' , INSTR(TEL, '-') - INSTR(TEL, ')' ) -1 , '*' ) -- 7 - 3 - 1 = 3 만큼 * 추가
+	    ) AS REPLACE
+from student
 where deptno1 = 102;
 
-select tel from student;
+-- replace 사용 x 버전
+select name, 
+       tel,
+       substr(tel, instr(tel, ')') )
+       || rpad('*' , instr(tel, '-') - instr(tel, ')') -1 , '*')
+       || substr(tel, instr(tel, '-')) as "REPLACE"
+FROM STUDENTWHERE 
+WHERE DEPTNO1 = 102;
 
 -- 85P 퀴즈 4
 select name, tel, 
