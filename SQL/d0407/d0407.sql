@@ -230,7 +230,7 @@ select job, ename, sal,
             order by sal desc) as "월급 등수" 
 from emp;
 
-
+--ROW_NUMBER	무조건 고유 순위 (1,2,3)
 
 select name, point,
     rank() over(
@@ -263,17 +263,85 @@ select name, point,
 from acorntbl
 order by "포인트 비율" desc;
 
-
+-- 교재 206p
 -- ratio_to_report
 select name, point,
-    trunc(ratio_to_report(point) over(), 3) * 100 as "비율"
+    trunc(ratio_to_report(point) over(), 3) * 100 || '%' as "비율"
 from acorntbl
 order by "비율" desc;
 
 desc emp;
 
 
---ROW_NUMBER	무조건 고유 순위 (1,2,3)
+
+-- decode 열 집계 구하기
+-- 189p 
+-- 직급별 사원의 수 구하기 (Decode)
+desc emp;
+
+select job, count(*) jobCnt
+from emp
+group by job;
+
+select
+    deptno,
+    count(decode(job, 'CLERK', 0 )) clerk,
+    count(decode(job, 'SALESMAN', 0)) SALESMAN,
+    count(decode(job, 'ANALYST', 0)) ANALYST,
+    count(decode(job, 'MANAGER', 0)) MANAGER,
+    count(decode(job, 'PRESIDENT', 0)) PRESIDENT
+FROM EMP
+group by deptno
+order by deptno;
+
+
+
+-- pivot : Oracle은 PIVOT 이 rows를 columns로 회전시키며, 그 과정에서 집계를 수행한다고 설명해. 
+-- 그리고 PIVOT 안에는 명시적 GROUP BY가 없지만, 실제로는 암묵적 GROUP BY 가 일어난다고 해.
+
+--SELECT *
+--FROM (
+--    SELECT 기준행컬럼, 피벗기준컬럼, 값컬럼
+--    FROM 테이블
+--)
+--PIVOT (
+--    집계함수(값컬럼)
+--    FOR 피벗기준컬럼 IN ('값1' AS 별칭1, '값2' AS 별칭2)
+--);
+CREATE TABLE TESTPIVOT
+AS
+select *
+from (
+    select deptno, job, empno
+    from emp
+    )
+pivot (
+    count(EMPNO)
+    for job in('CLERK' AS CLERK, 
+                'SALESMAN' AS SALESMAN,
+                'ANALYST' AS ANALYST,
+                'MANAGER' AS MANAGER,
+                'PRESIDENT' AS PRESIDENT)
+);
+
+SELECT * FROM TESTpIVOT;
+                
+-- UNPIVOT : Oracle은 UNPIVOT 이 columns를 rows로 회전시킨다고 설명해. 또 INCLUDE NULLS | EXCLUDE NULLS 옵션이 있고, 기본은 NULL 제외다. 
+-- 값 컬럼들은 같은 데이터 타입 그룹이어야 한다고 되어 있어.
+
+--SELECT *
+--FROM 테이블
+--UNPIVOT (
+--    값컬럼
+--    FOR 구분컬럼 IN (컬럼1 AS '값1', 컬럼2 AS '값2')
+--);
+
+SELECT * FROM TESTpIVOT
+UNPIVOT(
+    EMPNO
+        FOR JOB IN (CLERK, MANAGER, SALESMAN, ANALYST, PRESIDENT)
+    );
+-- 직금별 부서별 사원의 수 구하기 (decode )
 
 
 
@@ -285,4 +353,4 @@ desc emp;
 
 
 
--- 210~213 연습문제 이거 오후에 실습
+
