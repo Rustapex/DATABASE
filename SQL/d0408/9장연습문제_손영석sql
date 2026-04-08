@@ -1,0 +1,108 @@
+desc professor;
+desc department;
+
+
+-- 1
+create view v_prof_dept2
+as
+select p.profno prof_no , p.name prof_name , d.dname dept_name
+from professor p
+join department d
+    on p.deptno = d.deptno;
+
+select * from v_prof_dept2;
+
+
+-- 2 
+desc student;
+
+-- 1전공 별 최대 키, 최대 몸무게 구하기
+select deptno1, max(height), max(weight)
+from student
+group by deptno1;
+
+-- 전공 번호(deptno1)과 전공 이름(department) 연결하기
+select d.dname dname, s.m_height max_height, s.w_weight max_weight
+from department d
+join (select deptno1, max(height) m_height , max(weight) w_weight
+    from student
+    group by deptno1) s
+    on d.deptno = s.deptno1;
+    
+
+-- 3
+
+-- 2번 그대로 가져오기 
+
+-- 1전공 별 최대 키
+select deptno1, max(height)
+from student
+group by deptno1;
+
+-- 최대 키를 갖는 학생 이름, 전공번호, 키 구하기
+select s1.deptno1 deptno, name, s1.height height
+from student s1
+join (select s.deptno1 deptno, max(s.height) m_height
+    from student s
+    group by s.deptno1) s2
+    on s1.height = s2.m_height and s2.deptno = s1.deptno1;
+
+-- 전공번호 전공명으로 바꾸기
+select d.dname dname, s3.height height, s3.name name, s3.height height
+from department d
+join (select s1.deptno1 deptno, name, s1.height height
+        from student s1
+        join (select s.deptno1 deptno, max(s.height) m_height
+                from student s
+                group by s.deptno1) s2
+                on s1.height = s2.m_height and s2.deptno = s1.deptno1) s3
+        on d.deptno =  s3.deptno;
+        
+
+
+-- 4
+desc student;
+
+-- 학년별 평균 키 구하기
+select grade, avg(height) avg_h
+from student
+group by grade;
+
+-- 학년별 평균키 보다 큰 학생 구하기
+select s1.grade grade, s1.name name, s1.height height, grade_avg_h.avg_h avg_height
+from student s1
+join  (select grade, avg(height) avg_h
+        from student
+        group by grade) grade_avg_h
+    on s1.grade = grade_avg_h.grade and s1.height > grade_avg_h.avg_h
+order by s1.grade;
+    
+    
+    
+-- 5
+desc professor;
+
+-- 급여 많은 순서부터 정렬 / 후 5행만 자르기
+select name, pay
+from professor
+order by pay desc
+fetch first 5 rows only;
+
+-- 급여 많은 순서부터 순위, 이름, 급여 출력
+select rank() over(order by pay desc) ranking,
+    name,
+    pay 
+    from professor;
+
+select Ranking, Name, Pay
+from (
+    select rank() over(order by pay desc) ranking, 
+    name,
+    pay
+    from professor)
+where ranking <= 5;
+
+
+
+
+    
