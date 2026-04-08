@@ -57,7 +57,22 @@ join (select s1.deptno1 deptno, name, s1.height height
                 group by s.deptno1) s2
                 on s1.height = s2.m_height and s2.deptno = s1.deptno1) s3
         on d.deptno =  s3.deptno;
-        
+
+
+-- 조금 더 간단한 버전 
+select d.dname, s.name, s.height
+from student s
+join (
+    select deptno1, max(height) as max_height
+    from student
+    group by deptno1
+) m
+    on s.deptno1 = m.deptno1
+   and s.height = m.max_height
+join department d
+    on d.deptno = s.deptno1;
+
+
 
 
 -- 4
@@ -77,6 +92,23 @@ join  (select grade, avg(height) avg_h
     on s1.grade = grade_avg_h.grade and s1.height > grade_avg_h.avg_h
 order by s1.grade;
     
+
+-- window funciton 으로 풀기
+select grade,
+       name,
+       height,
+       avg_height
+from (
+    select grade,
+           name,
+           height,
+           avg(height) over (partition by grade) as avg_height
+    from student
+) s
+where height > avg_height
+order by grade;
+-- 서브 쿼리 안에서 grade 별로 평균 키를 구함
+-- 그 내용으로 바깥에서 where 로 평균 이상으 키를 보고 ,order by 로 학년 순서대로 출력
     
     
 -- 5
@@ -103,6 +135,21 @@ from (
 where ranking <= 5;
 
 
+-- 6 
+
+-- 교수번호 순서 오름차순으로 교수번호, 이름, pay 출력
+desc professor;
+select profno, name, pay
+from professor
+order by profno;
+
+select profno, name, pay, 
+    sum(pay) over(
+    partition by instr(to_char(profno, '9999'), 1,3)
+    order by profno) "sum(pay)"
+    from professor;
+    
+    
 
 
     

@@ -160,15 +160,8 @@ where salary > (select salary from t_emp where ename = '신동엽');
 -- Oracle은 ANY, ALL도 비교 연산자와 함께 사용
 -- 단일행이면 보통 일반 비교 연산자 전부 가능
 
---3-2. 다중행 서브쿼리
---정의는 “행이 여러 개 반환되는 서브쿼리”다.
---다중행 서브쿼리에 주로 쓰는 연산자
---
---IN : 여러 값 중 하나와 같으면 참
---NOT IN : 여러 값 모두와 달라야 참
---EXISTS : 결과 행이 한 건이라도 있으면 참
---ANY : 여러 값 중 하나와 비교해 참이면 참
---ALL : 모든 값과 비교해 참이어야 참
+
+
 
 --3-3. 다중컬럼 서브쿼리 : 정의는 바깥쪽에서 여러 컬럼을 묶어서 비교하는 서브쿼리
 -- 컬럼 수(모양)는 맞아야 / 행 수는 연산자에 따라 다르다
@@ -281,6 +274,115 @@ where weight > (select avg(weight) as avg_w
                 where deptno1 = 201);
 
 
+-- 다중행 서브쿼리 430p
+-- where 절 뒤에 나오는 서브쿼리
+-- 다중행 사용가능 연산자 : in, <any , >any, <all, >all, exists
+
+--IN : 여러 값 중 하나와 같으면 참
+--NOT IN : 여러 값 모두와 달라야 참
+--EXISTS : 결과 행이 한 건이라도 있으면 참
+--ANY : 여러 값 중 하나와 비교해 참이면 참
+--ALL : 모든 값과 비교해 참이어야 참
+
+select * from emp2;
+
+select dcode
+from dept2
+where area = 'Pohang Main Office';
+
+select empno, name, deptno
+from emp2
+where deptno in ('0001', '1003', '1006', '1007');
+
+select empno, name, deptno
+from emp2
+where deptno in (select dcode
+                from dept2
+                where area = 'Pohang Main Office');
+                
+select ename, sal
+from emp
+where sal > any(
+    select sal
+    from emp
+    where deptno = 20);
     
+select ename, sal
+from emp
+where sal > all(
+    select sal
+    from emp
+    where deptno = 20);
     
 
+select *
+from t_emp
+where exists (
+            select deptno
+            from t_dept
+            where deptno = 70);
+            
+select *
+from t_emp
+where exists (
+            select deptno
+            from t_dept
+            where deptno = 10);
+            
+            
+            
+select *
+from emp e
+where e.sal > (
+    select avg(e2.sal)
+    from emp e2
+    where e2.deptno = e.deptno
+);
+
+-- 연관 서브쿼리 실행순서
+-- 1. 메인쿼리 값이 서브쿼리에 전달
+-- 2. 서브쿼리 실행
+-- 3. 메인쿼리에서 사용함
+-- 4. 조건에 맞으면 결과에 나옴
+
+
+
+-- 스칼라 서브쿼리
+
+select * from emp;
+
+select e.ename, e.deptno, 
+    (select d.dname 
+    from dept d 
+    where d.deptno = e.deptno) as scalSubQuy
+from emp e;
+
+
+-- sql : 사용자 dbms, 소통언어
+-- ddl : create, drop , alter
+-- dml : read ( select)) insert, update, delete (crud)
+-- dcl : grant , revoke
+
+
+
+desc acorntbl;
+
+insert into acorntbl (id, pw, name, point)
+values ('DON', '9999', '스윙스', 0);
+
+UPDATE acorntbl
+SET ID = 'DONGAS'
+WHERE id ='DON';
+COMMIT;
+
+insert into acorntbl (id, pw, name, point)
+values ('CARD', '2323', '아이유', 22222);
+
+DELETE 
+FROM ACORNTBL
+WHERE name = '아이유';
+commit;
+
+select * from acorntbl
+WHERE NAME = '스윙스'
+AND ID = 'DON';
