@@ -143,13 +143,27 @@ select profno, name, pay
 from professor
 order by profno;
 
-select profno, name, pay, 
+select
+    rank() over(order by profno) NUM,
+ 
+    profno, name, pay, 
+ 
     sum(pay) over(
-    partition by instr(to_char(profno, '9999'), 1,3)
-    order by profno) "sum(pay)"
+    partition by trunc(profno, -1)
+    order by profno) "sum(pay)",
+    
+    round(sum(pay) over(
+    partition by trunc(profno, -1)
+    order by profno),1) "round(sum(pay),1)"
+    
     from professor;
     
+select trunc(profno, -1), profno
+from professor;
+
+select profno from professor;
     
+desc professor;
 
 
     
