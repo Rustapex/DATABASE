@@ -145,3 +145,6 @@ join roomGrade g
 join reservation r
     on g.roomgrade_num = r.roomgrade_num
 where h.hotel_name = 'BusanStay';
+
+
+select * from Hotel_Customer;
